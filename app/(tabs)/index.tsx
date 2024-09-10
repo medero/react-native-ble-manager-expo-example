@@ -9,7 +9,7 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 import * as ExpoDevice from "expo-device";
 
 BleManager.start({showAlert: false}).then(() => {
-  console.error('BleManager.start')
+  console.error('BleManager.start!')
 }).catch(console.error);
 
 const doScan = async () => {
@@ -65,11 +65,12 @@ const requestPermissions = async () => {
 }
 
 const requestAndroid31Permissions = async () => {
+  console.info('request android 31');
   try {
       const bluetoothScanPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
       {
-          title: "Location Permission",
+          title: "Location Permission1",
           message: "Bluetooth Low Energy requires Location",
           buttonPositive: "OK",
       }
@@ -77,7 +78,7 @@ const requestAndroid31Permissions = async () => {
       const bluetoothConnectPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
       {
-          title: "Location Permission",
+          title: "Location Permission2",
           message: "Bluetooth Low Energy requires Location",
           buttonPositive: "OK",
       }
@@ -85,7 +86,7 @@ const requestAndroid31Permissions = async () => {
       const fineLocationPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
-          title: "Location Permission",
+          title: "Location Permission3",
           message: "Bluetooth Low Energy requires Location",
           buttonPositive: "OK",
       }
