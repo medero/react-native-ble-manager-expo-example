@@ -1,11 +1,116 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import {  NativeEventEmitter, NativeModules, PermissionsAndroid, Image, StyleSheet, Platform, Button } from "react-native";
+import BleManager from 'react-native-ble-manager';
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+import * as ExpoDevice from "expo-device";
+
+BleManager.start({showAlert: false}).then(() => {
+  console.error('BleManager.start')
+}).catch(console.error);
+
+const doScan = async () => {
+  const isPermissionsGranted = await requestPermissions();
+
+  if (isPermissionsGranted) {
+    BleManager.scan([], 5, true) // scan for 5 seconds, allow duplicates
+      .then(() => {
+        console.log('Scanning...');
+      })
+      .catch((err) => {
+        console.error('Scan failed', err);
+      });
+  } else {
+    console.warn('Bluetooth permissions not granted.');
+  }
+}
+
+const handleDiscoverPeripheral = (peripheral) => {
+  console.info('Got ble peripheral', peripheral);
+  if (!peripheral.name) {
+    peripheral.name = 'NO NAME';
+  }
+}
+
+bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
+
+const requestPermissions = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      if ((ExpoDevice.platformApiLevel ?? -1) < 31) {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: "Location Permission",
+              message: "Bluetooth Low Energy requires Location",
+              buttonPositive: "OK",
+            }
+          );
+          return granted === PermissionsAndroid.RESULTS.GRANTED;
+        } else {
+          const isAndroid31PermissionsGranted =
+            await requestAndroid31Permissions();
+
+          return isAndroid31PermissionsGranted;
+        }
+
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+  }
+}
+
+const requestAndroid31Permissions = async () => {
+  try {
+      const bluetoothScanPermission = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+      {
+          title: "Location Permission",
+          message: "Bluetooth Low Energy requires Location",
+          buttonPositive: "OK",
+      }
+      );
+      const bluetoothConnectPermission = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+      {
+          title: "Location Permission",
+          message: "Bluetooth Low Energy requires Location",
+          buttonPositive: "OK",
+      }
+      );
+      const fineLocationPermission = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+          title: "Location Permission",
+          message: "Bluetooth Low Energy requires Location",
+          buttonPositive: "OK",
+      }
+      );
+
+          console.info(bluetoothScanPermission);
+          console.info(bluetoothConnectPermission);
+          console.info(fineLocationPermission);
+
+          return (
+            bluetoothScanPermission === "granted" &&
+            bluetoothConnectPermission === "granted" &&
+            fineLocationPermission === "granted"
+          );
+  } catch (error) {
+      console.error('try catch found ' + error?.message);
+  }
+
+  return false;
+};
+
 
 export default function HomeScreen() {
+  const permissions = requestPermissions();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -16,35 +121,9 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">Hello World!</ThemedText>
         <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
+        <Button onPress={doScan} title="Scan" />
       </ThemedView>
     </ParallaxScrollView>
   );
