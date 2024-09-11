@@ -65,12 +65,11 @@ const requestPermissions = async () => {
 }
 
 const requestAndroid31Permissions = async () => {
-  console.info('request android 31');
   try {
       const bluetoothScanPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
       {
-          title: "Location Permission1",
+          title: "Location Permission",
           message: "Bluetooth Low Energy requires Location",
           buttonPositive: "OK",
       }
@@ -78,7 +77,7 @@ const requestAndroid31Permissions = async () => {
       const bluetoothConnectPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
       {
-          title: "Location Permission2",
+          title: "Location Permission",
           message: "Bluetooth Low Energy requires Location",
           buttonPositive: "OK",
       }
@@ -86,7 +85,7 @@ const requestAndroid31Permissions = async () => {
       const fineLocationPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
-          title: "Location Permission3",
+          title: "Location Permission",
           message: "Bluetooth Low Energy requires Location",
           buttonPositive: "OK",
       }
@@ -110,8 +109,6 @@ const requestAndroid31Permissions = async () => {
 
 
 export default function HomeScreen() {
-  const permissions = requestPermissions();
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -122,7 +119,7 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Hello World!</ThemedText>
+        <ThemedText type="title">Hey Young World</ThemedText>
         <HelloWave />
         <Button onPress={doScan} title="Scan" />
       </ThemedView>
